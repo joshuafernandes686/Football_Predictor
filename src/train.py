@@ -79,7 +79,7 @@ def prepare_data(df):
     print(f"\nTraining Samples : {len(X_train)}")
     print(f"Testing Samples  : {len(X_test)}")
 
-    return X_train, X_test, y_train, y_test, feature_columns
+    return X_train, X_test, y_train, y_test, feature_columns, encoder
 
 
 # ==========================================================
@@ -201,7 +201,7 @@ def save_model_report(
 
 df = load_data()
 
-X_train, X_test, y_train, y_test, feature_columns = prepare_data(df)
+X_train, X_test, y_train, y_test, feature_columns, encoder = prepare_data(df)
 
 model = train_model(X_train, y_train)
 
@@ -211,7 +211,7 @@ accuracy, cm, report = evaluate_model(
     y_test
 )
 
-save_model(model, encoder=LabelEncoder())
+save_model(model, encoder=encoder)
 
 save_model_report(
     model_name="Logistic Regression",
