@@ -20,3 +20,11 @@ results dataset: https://github.com/martj42/international_results/blob/master/re
 1. function to get latest elo rating for each team before the match date
 2. funtion to add the features: home_elo, away_elo, elo_diff
 3. Save feature engineered datasets to CSV files for future use.
+
+
+*model training steps:*
+1. Load the feature engineered datasets into pandas DataFrames.
+2. Split the data into training and testing sets.
+3. Train a logistic regression model using the training set.
+4. Evaluate the model's performance on the testing set using accuracy, confusion matrix, and classification report.
+5. Save the trained model and evaluation metrics to files for future use.
