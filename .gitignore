@@ -26,10 +26,7 @@ __pycache__/
 models/*.pkl
 models/*.joblib
 
-# ==========================
-# Processed Data
-# ==========================
-data/processed/
+
 
 # ==========================
 # Environment Variables
