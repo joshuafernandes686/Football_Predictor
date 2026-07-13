@@ -11,7 +11,7 @@ MODEL_DIR = Path("models")
 DOCS_DIR = Path("docs")
 PREDICTION_LOG = DOCS_DIR / "PREDICTION_LOG.md"
 
-MODEL_FILE = MODEL_DIR / "baseline_logistic_regression.pkl"
+MODEL_FILE = MODEL_DIR / "best_model.pkl"
 ELO_FILE = PROCESSED_DATA / "elo_clean.csv"
 
 # ==========================================================

@@ -3,9 +3,13 @@ import joblib
 from pathlib import Path
 from datetime import datetime
 
+
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from xgboost import XGBClassifier
 from sklearn.metrics import (
     accuracy_score,
     confusion_matrix,
@@ -21,7 +25,7 @@ MODEL_DIR = Path("models")
 DOCS_DIR = Path("docs")
 
 FEATURES_FILE = PROCESSED_DATA / "features.csv"
-MODEL_FILE = MODEL_DIR / "baseline_logistic_regression.pkl"
+MODEL_DIR = Path("models")
 REPORT_FILE = DOCS_DIR / "MODEL_REPORT.md"
 
 # ==========================================================
@@ -86,21 +90,17 @@ def prepare_data(df):
 # Train Model
 # ==========================================================
 
-def train_model(X_train, y_train):
+def train_model(model, model_name, X_train, y_train):
 
-    print("\nTraining Logistic Regression...")
-
-    model = LogisticRegression(
-        max_iter=1000,
-        random_state=42
-    )
+    print("\n" + "=" * 60)
+    print(f"TRAINING {model_name.upper()}")
+    print("=" * 60)
 
     model.fit(X_train, y_train)
 
     print("✓ Training Complete")
 
     return model
-
 
 # ==========================================================
 # Evaluate Model
@@ -131,20 +131,19 @@ def evaluate_model(model, X_test, y_test):
 # Save Model
 # ==========================================================
 
-def save_model(model, encoder):
+def save_model(model, encoder, filename):
 
     MODEL_DIR.mkdir(parents=True, exist_ok=True)
 
     joblib.dump(
-    {
-        "model": model,
-        "encoder": encoder
-    },
-    MODEL_FILE
-)
+        {
+            "model": model,
+            "encoder": encoder
+        },
+        MODEL_DIR / filename
+    )
 
-    print(f"\nModel saved to:\n{MODEL_FILE}")
-
+    print(f"\nModel saved to:\n{MODEL_DIR / filename}")
 
 # ==========================================================
 # Save Model Report
@@ -203,25 +202,197 @@ df = load_data()
 
 X_train, X_test, y_train, y_test, feature_columns, encoder = prepare_data(df)
 
-model = train_model(X_train, y_train)
+# ==========================================================
+# Model Comparison
+# ==========================================================
+
+model_results = {}
+trained_models = {}
+
+logistic_model = LogisticRegression(
+    max_iter=1000,
+    random_state=42
+)
+
+logistic_model = train_model(
+    logistic_model,
+    "Logistic Regression",
+    X_train,
+    y_train
+)
 
 accuracy, cm, report = evaluate_model(
-    model,
+    logistic_model,
     X_test,
     y_test
 )
 
-save_model(model, encoder=encoder)
+model_results["Logistic Regression"] = accuracy
+trained_models["Logistic Regression"] = logistic_model
+
+save_model(
+    logistic_model,
+    encoder,
+    "baseline_logistic_regression.pkl"
+)
 
 save_model_report(
     model_name="Logistic Regression",
-    model=model,
+    model=logistic_model,
     features=feature_columns,
     accuracy=accuracy,
     cm=cm,
     report=report
 )
 
+# ==========================================================
+# Decision Tree
+# ==========================================================
+
+decision_tree = DecisionTreeClassifier(
+    random_state=42
+)
+
+decision_tree = train_model(
+    decision_tree,
+    "Decision Tree",
+    X_train,
+    y_train
+)
+
+accuracy, cm, report = evaluate_model(
+    decision_tree,
+    X_test,
+    y_test
+)
+
+model_results["Decision Tree"] = accuracy
+trained_models["Decision Tree"] = decision_tree
+
+save_model(
+    decision_tree,
+    encoder,
+    "decision_tree.pkl"
+)
+
+save_model_report(
+    model_name="Decision Tree",
+    model=decision_tree,
+    features=feature_columns,
+    accuracy=accuracy,
+    cm=cm,
+    report=report
+)
+
+# ==========================================================
+# Random Forest
+# ==========================================================
+
+random_forest = RandomForestClassifier(
+    n_estimators=100,
+    random_state=42
+)
+
+random_forest = train_model(
+    random_forest,
+    "Random Forest",
+    X_train,
+    y_train
+)
+
+accuracy, cm, report = evaluate_model(
+    random_forest,
+    X_test,
+    y_test
+)
+
+model_results["Random Forest"] = accuracy
+trained_models["Random Forest"] = random_forest
+
+save_model(
+    random_forest,
+    encoder,
+    "random_forest.pkl"
+)
+
+save_model_report(
+    model_name="Random Forest",
+    model=random_forest,
+    features=feature_columns,
+    accuracy=accuracy,
+    cm=cm,
+    report=report
+)
+
+# ==========================================================
+# XGBoost
+# ==========================================================
+
+xgboost = XGBClassifier(
+    objective="multi:softprob",
+    num_class=3,
+    n_estimators=100,
+    learning_rate=0.1,
+    max_depth=6,
+    random_state=42,
+    eval_metric="mlogloss"
+)
+
+xgboost = train_model(
+    xgboost,
+    "XGBoost",
+    X_train,
+    y_train
+)
+
+accuracy, cm, report = evaluate_model(
+    xgboost,
+    X_test,
+    y_test
+)
+
+model_results["XGBoost"] = accuracy
+trained_models["XGBoost"] = xgboost
+
+save_model(
+    xgboost,
+    encoder,
+    "xgboost.pkl"
+)
+
+save_model_report(
+    model_name="XGBoost",
+    model=xgboost,
+    features=feature_columns,
+    accuracy=accuracy,
+    cm=cm,
+    report=report
+)
+
+# ==========================================================
+# Select Best Model
+# ==========================================================
+
+best_model_name = max(model_results, key=model_results.get)
+best_accuracy = model_results[best_model_name]
+best_model = trained_models[best_model_name]
+
 print("\n" + "=" * 60)
-print("TRAINING COMPLETE")
+print("MODEL COMPARISON")
 print("=" * 60)
+
+for name, score in model_results.items():
+    print(f"{name:<25} : {score:.4f}")
+
+print("\nBest Model")
+print("----------")
+print(f"{best_model_name} ({best_accuracy:.4f})")
+
+save_model(
+    best_model,
+    encoder,
+    "best_model.pkl"
+)
+
+print("\nBest model saved to:")
+print("models/best_model.pkl")
