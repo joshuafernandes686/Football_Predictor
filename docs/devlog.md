@@ -28,3 +28,10 @@ results dataset: https://github.com/martj42/international_results/blob/master/re
 3. Train a logistic regression model using the training set.
 4. Evaluate the model's performance on the testing set using accuracy, confusion matrix, and classification report.
 5. Save the trained model and evaluation metrics to files for future use.
+
+Day 2:
+
+Trained and evaluated Decision Tree, Random Forest, and XGBoost models. Compared their performance with the Logistic Regression model.
+Decision Tree, Random Forest, and XGBoost models couldn't outperform the Logistic Regression model.
+Insufficient features and data might be the reason for the underperformance of these models. 
+Further feature engineering and data collection are needed to improve the model's performance.

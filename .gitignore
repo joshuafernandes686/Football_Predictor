@@ -38,3 +38,11 @@ models/*.joblib
 # ==========================
 .DS_Store
 Thumbs.db
+
+
+src/inspect_data.py
+
+# ==========================
+# RAG Vector Store Data
+# ==========================
+rag/vector_store_data/
